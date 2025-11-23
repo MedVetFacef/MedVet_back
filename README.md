@@ -78,5 +78,5 @@ backend/
 
 ## 👨‍💻 Desenvolvido por
 
-**Pedro Gomes de Almeida** e **Matheus de Castro Evangelista**
+**Pedro Gomes de Almeida** e **Matheus de Castro Evangelista** 
 
