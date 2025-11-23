@@ -1,13 +1,4 @@
-import { defineConfig, env } from "prisma/config";
-
-export default defineConfig({
-  schema: "prisma/schema.prisma",
-  migrations: {
-    path: "prisma/migrations",
-  },
-  engine: "classic",
-  datasource: {
-    url: env("DATABASE_URL"),
-  },
-});
+// Este arquivo não é necessário - o Prisma usa schema.prisma diretamente
+// Removido para evitar erros durante o build quando DATABASE_URL não está disponível
+// A DATABASE_URL será lida do schema.prisma em runtime através de variáveis de ambiente
 
