@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import { connectDatabase } from "./config/dbConnect.js";
+import mongoose from "mongoose";
 import errorMiddleware from "./middleware/erros.js";
 import clinicRoutes from "./routes/clinicRoutes.js";
 import veterinaryRoutes from "./routes/veterinaryRoutes.js";
@@ -47,7 +48,19 @@ if (process.env.NODE_ENV !== 'production') {
   console.log("🔧 Modo PRODUÇÃO: Usando variáveis de ambiente do sistema.");
 }
 
-connectDatabase();
+// Verifica variáveis de ambiente críticas
+console.log("📋 Verificando variáveis de ambiente:");
+console.log(`  - NODE_ENV: ${process.env.NODE_ENV || 'não definido'}`);
+console.log(`  - PORT: ${process.env.PORT || 'não definido (usando 3000)'}`);
+console.log(`  - DB_URI: ${process.env.DB_URI ? '✅ configurada' : '❌ não configurada'}`);
+console.log(`  - DATABASE_URL: ${process.env.DATABASE_URL ? '✅ configurada' : '❌ não configurada'}`);
+console.log(`  - JWT_SECRET: ${process.env.JWT_SECRET ? '✅ configurada' : '❌ não configurada'}`);
+
+// Conecta ao banco de dados (não bloqueia o servidor se falhar)
+connectDatabase().catch((err) => {
+  console.error('❌ Erro ao inicializar conexão com banco:', err.message);
+  // Continua iniciando o servidor mesmo se o banco falhar
+});
 
 // Configuração CORS para produção
 const corsOptions = {
@@ -102,11 +115,17 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  
   res.json({ 
     status: "ok",
     message: "API está funcionando!",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      mongodb: dbStatus,
+      postgres: "checking..." // Prisma será verificado nas rotas
+    }
   });
 });
 
@@ -134,20 +153,33 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
+const HOST = process.env.HOST || '0.0.0.0'; // Railway precisa escutar em 0.0.0.0
+
+const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📡 API disponível em: http://localhost:${PORT}/api/v1`);
+  console.log(`📡 API disponível em: http://${HOST}:${PORT}/api/v1`);
+  console.log(`🔗 Health check: http://${HOST}:${PORT}/health`);
 });
 
+// Tratamento de erros não capturados
 process.on("uncaughtException", (err) => {
-  server.close(() => {
-    process.exit(1);
-  });
+  console.error("❌ Uncaught Exception:", err);
+  console.error("Stack:", err.stack);
+  // Não encerra imediatamente, permite que o servidor tente se recuperar
+  // Em produção, você pode querer encerrar após logar
+  if (process.env.NODE_ENV === 'production') {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
 });
 
 process.on("unhandledRejection", (err) => {
-  server.close(() => {
-    process.exit(1);
-  });
+  console.error("❌ Unhandled Rejection:", err);
+  // Loga mas não encerra o servidor
+  // Em produção, você pode querer encerrar
+  if (process.env.NODE_ENV === 'production') {
+    console.error("Stack:", err?.stack);
+  }
 });
