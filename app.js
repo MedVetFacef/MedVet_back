@@ -56,6 +56,22 @@ console.log(`  - DB_URI: ${process.env.DB_URI ? '✅ configurada' : '❌ não co
 console.log(`  - DATABASE_URL: ${process.env.DATABASE_URL ? '✅ configurada' : '❌ não configurada'}`);
 console.log(`  - JWT_SECRET: ${process.env.JWT_SECRET ? '✅ configurada' : '❌ não configurada'}`);
 
+// Avisos sobre variáveis críticas faltando
+const missingVars = [];
+if (!process.env.JWT_SECRET) {
+  missingVars.push('JWT_SECRET');
+  console.error('⚠️  ATENÇÃO: JWT_SECRET não configurada! Autenticação não funcionará.');
+}
+if (!process.env.DB_URI && !process.env.DATABASE_URL) {
+  missingVars.push('DB_URI ou DATABASE_URL');
+  console.error('⚠️  ATENÇÃO: Nenhum banco de dados configurado! Aplicação pode não funcionar.');
+}
+
+if (missingVars.length > 0 && process.env.NODE_ENV === 'production') {
+  console.error('❌ Variáveis críticas faltando:', missingVars.join(', '));
+  console.error('📝 Configure essas variáveis no Railway: Settings → Variables');
+}
+
 // Conecta ao banco de dados (não bloqueia o servidor se falhar)
 connectDatabase().catch((err) => {
   console.error('❌ Erro ao inicializar conexão com banco:', err.message);
