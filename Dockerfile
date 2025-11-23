@@ -13,6 +13,12 @@ COPY package*.json ./
 # Copia o schema do Prisma ANTES de instalar (necessário para o postinstall)
 COPY prisma ./prisma
 
+# Copia o diretório scripts (necessário para o postinstall)
+COPY scripts ./scripts
+
+# Copia o diretório config (necessário para scripts/run-prisma.js)
+COPY config ./config
+
 # Instala as dependências (usa npm install pois pode não ter package-lock.json)
 # O postinstall irá gerar o Prisma Client automaticamente
 RUN npm install --omit=dev
