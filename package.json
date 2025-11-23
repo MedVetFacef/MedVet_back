@@ -1,0 +1,34 @@
+{
+  "name": "medvet-backend",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "prisma:generate": "node scripts/run-prisma.js generate --schema=./prisma/schema.prisma",
+    "prisma:migrate": "node scripts/run-prisma.js migrate deploy --schema=./prisma/schema.prisma",
+    "postinstall": "node scripts/run-prisma.js generate --schema=./prisma/schema.prisma"
+  },
+  "author": "Pedro Gomes de Almeida e Matheus de Castro Evangelista",
+  "license": "ISC",
+  "description": "Backend do sistema MedVet - Gestão Veterinária",
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.3",
+    "prisma": "^6.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}
+

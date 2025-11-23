@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Serviço do backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medvet-backend-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - DB_URI=${DB_URI}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_TIME=${JWT_EXPIRES_TIME:-7d}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+    networks:
+      - medvet-network
+    command: sh -c "npx prisma migrate deploy --schema=./prisma/schema.prisma || true && npm start"
+
+  # Serviço do MongoDB (opcional - pode usar MongoDB Atlas)
+  mongodb:
+    image: mongo:7
+    container_name: medvet-mongodb-prod
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=medvet
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - medvet-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Serviço do PostgreSQL (opcional - pode usar Neon)
+  postgres:
+    image: postgres:16-alpine
+    container_name: medvet-postgres-prod
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-medvet123}
+      - POSTGRES_DB=medvet
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - medvet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
+  postgres_data:
+
+networks:
+  medvet-network:
+    driver: bridge
+

@@ -1,0 +1,8 @@
+node_modules
+config/config.env
+prisma/migrations
+prisma/seed.js
+prisma/schema.prisma
+prisma/seed.js
+.env
+scripts/run-prisma.js
