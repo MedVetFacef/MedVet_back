@@ -20,8 +20,9 @@ prisma/migrations
 prisma/seed.js
 
 # Exclude config files that might contain secrets
-config/config.env
+# Note: config.env is needed for build, but should use build-time env vars
+# config/config.env
 
-# Exclude scripts
-scripts/run-prisma.js
+# Scripts are needed for postinstall
+# scripts/run-prisma.js
 

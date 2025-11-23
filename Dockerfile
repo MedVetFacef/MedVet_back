@@ -19,6 +19,12 @@ COPY scripts ./scripts
 # Copia o diretório config (necessário para scripts/run-prisma.js)
 COPY config ./config
 
+# Cria um config.env mínimo se não existir (prisma generate não precisa de DB)
+RUN if [ ! -f config/config.env ]; then \
+      echo "# Minimal config for build time" > config/config.env; \
+      echo "DATABASE_URL=\"postgresql://dummy:dummy@localhost:5432/dummy?schema=public\"" >> config/config.env; \
+    fi
+
 # Instala as dependências (usa npm install pois pode não ter package-lock.json)
 # O postinstall irá gerar o Prisma Client automaticamente
 RUN npm install --omit=dev
