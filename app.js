@@ -15,37 +15,42 @@ const app = express();
 // Carrega variáveis de ambiente - tenta múltiplos caminhos
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Tenta carregar o .env de diferentes locais (apenas em desenvolvimento)
-// Em produção, as variáveis devem vir do sistema (Docker, Railway, etc)
-if (process.env.NODE_ENV !== 'production') {
-  const envPaths = [
-    join(__dirname, 'config', 'config.env'),
-    join(process.cwd(), 'config', 'config.env'),
-  ];
+if (process.env.NODE_ENV === 'PRODUCTION') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+}
 
-  let envLoaded = false;
-  for (const envPath of envPaths) {
-    try {
-      const result = dotenv.config({ path: envPath });
-      if (!result.error) {
-        envLoaded = true;
-        console.log(`✅ Variáveis de ambiente carregadas de: ${envPath}`);
-        break;
-      }
-    } catch (err) {
-      // Continua tentando próximo caminho
+// Tenta carregar o .env de diferentes locais
+// Em produção, tenta carregar como fallback se variáveis não estiverem definidas
+const envPaths = [
+  join(__dirname, 'config', 'config.env'),
+  join(process.cwd(), 'config', 'config.env'),
+];
+
+let envLoaded = false;
+for (const envPath of envPaths) {
+  try {
+    const result = dotenv.config({ path: envPath });
+    if (!result.error) {
+      envLoaded = true;
+      console.log(`✅ Variáveis de ambiente carregadas de: ${envPath}`);
+      break;
     }
+  } catch (err) {
+    // Continua tentando próximo caminho
   }
+}
 
-  if (!envLoaded) {
+if (!envLoaded) {
+  if (process.env.NODE_ENV === 'PRODUCTION') {
+    console.log("🔧 Modo PRODUÇÃO: Usando variáveis de ambiente do sistema.");
+  } else {
     console.warn("⚠️  AVISO: Não foi possível carregar o arquivo config.env. Usando variáveis de ambiente do sistema.");
   }
-} else {
-  console.log("🔧 Modo PRODUÇÃO: Usando variáveis de ambiente do sistema.");
 }
 
 // Verifica variáveis de ambiente críticas
@@ -67,7 +72,7 @@ if (!process.env.DB_URI && !process.env.DATABASE_URL) {
   console.error('⚠️  ATENÇÃO: Nenhum banco de dados configurado! Aplicação pode não funcionar.');
 }
 
-if (missingVars.length > 0 && process.env.NODE_ENV === 'production') {
+if (missingVars.length > 0 && process.env.NODE_ENV === 'PRODUCTION') {
   console.error('❌ Variáveis críticas faltando:', missingVars.join(', '));
   console.error('📝 Configure essas variáveis no Railway: Settings → Variables');
 }
@@ -101,7 +106,7 @@ const corsOptions = {
       callback(null, true);
     } else {
       // Em desenvolvimento, permite qualquer origem
-      if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'PRODUCTION') {
         callback(null, true);
       } else {
         console.warn(`⚠️  CORS bloqueado para origin: ${origin}`);
@@ -161,6 +166,21 @@ app.use("/api/v1/clinics", clinicRoutes);
 app.use("/api/v1/veterinaries", veterinaryRoutes);
 
 app.use(errorMiddleware);
+
+// Rota catch-all para produção (servir o frontend React)
+// Deve estar no final, depois de todas as rotas da API
+if (process.env.NODE_ENV === 'PRODUCTION') {
+  // Serve o index.html para todas as rotas GET que não são da API
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      res.sendFile(path.resolve(__dirname, '../frontend/build/index.html'));
+    } else {
+      next();
+    }
+  });
+}
+
+// Middleware 404 para rotas não encontradas
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -184,7 +204,7 @@ process.on("uncaughtException", (err) => {
   console.error("Stack:", err.stack);
   // Não encerra imediatamente, permite que o servidor tente se recuperar
   // Em produção, você pode querer encerrar após logar
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'PRODUCTION') {
     server.close(() => {
       process.exit(1);
     });
@@ -195,7 +215,7 @@ process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Rejection:", err);
   // Loga mas não encerra o servidor
   // Em produção, você pode querer encerrar
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'PRODUCTION') {
     console.error("Stack:", err?.stack);
   }
 });
