@@ -3,12 +3,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import { connectDatabase } from "./config/dbConnect.js";
-import mongoose from "mongoose";
 import errorMiddleware from "./middleware/erros.js";
 import clinicRoutes from "./routes/clinicRoutes.js";
 import veterinaryRoutes from "./routes/veterinaryRoutes.js";
 import vetRoutes from "./routes/vet.js";
 import chatbotRoutes from "./routes/chatbotRoutes.js";
+import mongoose from "mongoose";
 
 const app = express();
 

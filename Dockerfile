@@ -21,8 +21,7 @@ RUN npm install --omit=dev
 COPY . .
 
 # Gera o Prisma Client novamente (caso o postinstall tenha falhado)
-# Usa uma DATABASE_URL dummy apenas para gerar o client (não precisa de conexão real)
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5433/dummy?schema=public" npx prisma generate --schema=./prisma/schema.prisma || true
+RUN npx prisma generate --schema=./prisma/schema.prisma || true
 
 # Define variável de ambiente para produção
 ENV NODE_ENV=production

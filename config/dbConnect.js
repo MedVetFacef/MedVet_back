@@ -33,5 +33,6 @@ export const connectDatabase = async () => {
     console.error('❌ Erro ao conectar MongoDB:', err.message);
     // Não encerra o servidor, apenas loga o erro
     // O servidor pode funcionar sem MongoDB se não for usado
+    throw err; // Re-throw para que o .catch() no app.js funcione
   }
 };

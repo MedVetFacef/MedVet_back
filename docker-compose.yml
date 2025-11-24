@@ -13,7 +13,7 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - DB_URI=mongodb://mongodb:27017/medvet
-      - DATABASE_URL=postgresql://postgres:medvet123@postgres:5433/medvet?schema=public
+      - DATABASE_URL=postgresql://postgres:medvet123@postgres:5432/medvet?schema=public
       - JWT_SECRET=${JWT_SECRET:-vefgHHBGjbbf54feef54f5fhGh}
       - JWT_EXPIRES_TIME=${JWT_EXPIRES_TIME:-7d}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -54,7 +54,7 @@ services:
     image: postgres:16-alpine
     container_name: medvet-postgres
     ports:
-      - "5433:5433"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=medvet123

@@ -28,7 +28,7 @@ Configure as variáveis de ambiente no arquivo `.env` ou diretamente no `docker-
 ```env
 PORT=3000
 DB_URI=mongodb://mongodb:27017/medvet
-DATABASE_URL=postgresql://postgres:medvet123@postgres:5433/medvet?schema=public
+DATABASE_URL=postgresql://postgres:medvet123@postgres:5432/medvet?schema=public
 JWT_SECRET=seu-secret-jwt
 JWT_EXPIRES_TIME=7d
 OPENAI_API_KEY=sua-chave-openai
@@ -60,5 +60,5 @@ docker-compose exec backend sh
 
 - **Backend**: Node.js/Express na porta 3000
 - **MongoDB**: Porta 27017
-- **PostgreSQL**: Porta 5433
+- **PostgreSQL**: Porta 5432
 

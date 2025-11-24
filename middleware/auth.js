@@ -17,10 +17,6 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Por favor, faça login para acessar este recurso", 401));
   }
 
-  if (!process.env.JWT_SECRET) {
-    return next(new ErrorHandler("Erro de configuração do servidor: JWT_SECRET não configurada", 500));
-  }
-
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   req.user = await User.findById(decoded.id);
 

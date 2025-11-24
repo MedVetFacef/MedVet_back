@@ -19,9 +19,6 @@ coverage
 prisma/migrations
 prisma/seed.js
 
-# Exclude prisma.config.ts (causes build errors when DATABASE_URL is not available)
-prisma.config.ts
-
 # Exclude config files that might contain secrets
 # Note: config.env is needed for build, but should use build-time env vars
 # config/config.env
